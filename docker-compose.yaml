@@ -1,0 +1,10 @@
+version: "3"
+services:
+  ai-server:
+    build:
+      context: ./code
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./code:/deploy
+    ports:
+      - "8000:80"
