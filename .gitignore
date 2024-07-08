@@ -1,2 +1,3 @@
 code/train_outputs/*
 code/images/*
+code/utils/__pycache__/*
