@@ -16,8 +16,8 @@ from detectron2.engine.defaults import DefaultPredictor
 from detectron2.utils.video_visualizer import VideoVisualizer
 from detectron2.utils.visualizer import (ColorMode, GenericMask, Visualizer,
                                          _create_text_labels)
-# from aistron.utils.visualizer import AmodalVisualizer
-from utils.my_visualizer import AmodalVisualizer
+from aistron.utils.visualizer import AmodalVisualizer
+# from utils.my_visualizer import AmodalVisualizer
 
 
 def get_default_metadata():
@@ -71,6 +71,7 @@ class VisualizationDemo(object):
             # Convert image from OpenCV BGR format to Matplotlib RGB format.
             image = image[:, :, ::-1]
             visualizer = AmodalVisualizer(image, self.metadata, instance_mode=self.instance_mode)
+
             if "panoptic_seg" in predictions:
                 panoptic_seg, segments_info = predictions["panoptic_seg"]
                 vis_output = visualizer.draw_panoptic_seg_predictions(
@@ -83,7 +84,7 @@ class VisualizationDemo(object):
                     )
                 if "instances" in predictions:
                     instances = predictions["instances"].to(self.cpu_device)
-                    vis_output = visualizer.draw_amodal_instance_predictions(predictions=instances, segm_type=segm_type)
+                    vis_output = visualizer.draw_instance_predictions(predictions=instances, segm_type=segm_type)
 
             return predictions, vis_output
 
