@@ -25,17 +25,19 @@ def inference(image, cfg, threshold=0.5):
     visualized_output_visible = visualized_output_visible.get_image()
     visualized_output_amodal = visualized_output_amodal.get_image()
 
-    num_instances = len(predictions_amodal["instances"])
+    num_amodal_instances = len(predictions_amodal["instances"])
+    num_visible_instances = len(predictions_visible["instances"])
 
-    return visualized_output_visible, visualized_output_amodal, num_instances
+    return visualized_output_visible, visualized_output_amodal, num_amodal_instances, num_visible_instances
 
-def predict(im_path, cfg, threshold = 0.5) -> PIL.Image.Image:
+def predict(im_path, cfg, threshold = 0.65) -> PIL.Image.Image:
     # Predict function to process input image and return the model's predictions
 
     # Read the image
     image = cv2.imread(im_path)
     # Preprocess the image
-    preprocessed_img = preprocess_image(image)
-    visible_image, amodal_image, num_instances = inference(preprocessed_img, cfg, threshold=threshold)
+    # preprocessed_img = preprocess_image(image)
+    preprocessed_img = cv2.resize(image, (640, 640))
+    visible_image, amodal_image, num_amodal_instances, num_visible_instances = inference(preprocessed_img, cfg, threshold=threshold)
 
-    return image, visible_image, amodal_image, num_instances
+    return image, visible_image, amodal_image, num_amodal_instances, num_visible_instances
