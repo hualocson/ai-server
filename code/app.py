@@ -20,12 +20,21 @@ from aistron.projects.aisformer.config import add_aisformer_config
 model = None
 app = Flask(__name__)
 
+global base_path
+
+bash_path = os.getcwd()
 
 def load_model():
     global model, cfg
     # config_path="/home/locson/workspaces/AI/KLTN_project/server/code/configs/config.yaml"
-    config_path="/home/locson/workspaces/AI/KLTN_project/server/code/aistron/projects/AISFormer/configs/COCOA/aisformer_R101_FPN_cocoa_8ep_bs2.yaml"
-    model_path = "/home/locson/workspaces/AI/KLTN_project/server/code/train_outputs/model_final.pth"
+    # get config path and model path
+    config_path = os.path.join(bash_path, "aistron/projects/AISFormer/configs/COCOA/aisformer_R50_FPN_cocoa_8ep_bs2.yaml")
+    # config_path= os.path.join(os.getcwd(), "/aistron/projects/AISFormer/configs/COCOA/aisformer_R50_FPN_cocoa_8ep_bs2.yaml")
+
+    #"/home/locson/workspaces/AI/KLTN_project/server/code/aistron/projects/AISFormer/configs/COCOA/aisformer_R50_FPN_cocoa_8ep_bs2.yaml"
+    model_path = os.path.join(bash_path, "train_outputs/model_final.pth")
+
+    # "/home/locson/workspaces/AI/KLTN_project/server/code/train_outputs/model_final.pth"
 
     cfg = Cf.get_cfg()
     add_aistron_config(cfg)
