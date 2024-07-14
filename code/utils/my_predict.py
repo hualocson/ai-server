@@ -30,7 +30,7 @@ def inference(image, cfg, threshold=0.5):
 
     return visualized_output_visible, visualized_output_amodal, num_amodal_instances, num_visible_instances
 
-def predict(im_path, cfg, threshold = 0.5) -> PIL.Image.Image:
+def predict(im_path, cfg, threshold = 0.65) -> PIL.Image.Image:
     # Predict function to process input image and return the model's predictions
 
     # Read the image
