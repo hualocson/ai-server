@@ -125,7 +125,7 @@ def get_average_length_of_pictures_in_directory(directory, cfg):
             # Perform inferrence
         predictions_amodal, visualized_output_amodal = predictor.run_on_image(img, segm_type  = 'amodal')
 
-        list_of_lines = detect_and_draw_line_on_image(predictions_amodal['instances'].pred_masks)
+        list_of_lines = detect_and_draw_line_on_image(predictions_amodal['instances'].pred_amodal_masks)
 
         average_length = calculate_average_length(list_of_lines)
         if average_length>0:
