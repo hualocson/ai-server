@@ -3,43 +3,42 @@ import numpy as np
 import scipy.stats as ss
 import matplotlib.pyplot as plt
 
+import matplotlib
+matplotlib.use('Agg')  # Use the 'Agg' backend for non-GUI rendering
+
+from matplotlib.ticker import ScalarFormatter, LogLocator
+
 # Define the function to plot and save the size distribution chart
-def plot_size_distribution(average_lengths, title_name='Size Distribution Chart'):
-    # Define the bins for the histogram
-    bins = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200]
-    # Remove NaN values and scale the lengths
-    average_lengths = np.array(average_lengths) * 5
-    average_lengths = average_lengths[~np.isnan(average_lengths)]
-    # Calculate the number of elements in each bin
-    counts, bin_edges = np.histogram(average_lengths, bins)
-    bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+def plot_size_distribution(crystal_sizes, file_path):
+    # Xác định các khoảng giá trị tròn
+    max_value = max(crystal_sizes)
+    bin_edges = np.linspace(0, max_value + 1, num=16)  # Chia thành 16 điểm để có 15 khoảng
+    bin_edges = np.round(bin_edges, -3)  # Làm tròn đến hàng nghìn
 
-    # Fit a gamma distribution and calculate the PDF
-    alpha_est, loc_est, beta_est = ss.gamma.fit(average_lengths, floc=0)  # Fix location to 0
-    rv = ss.gamma(alpha_est, loc=loc_est, scale=beta_est)
-    x = np.linspace(0, max(average_lengths), 1000)
-    pdf = rv.pdf(x)
+    # Tính tần số của mỗi nhóm
+    hist, _ = np.histogram(crystal_sizes, bins=bin_edges)
 
-    # Scale the PDF to match the histogram's peak
-    max_count = max(counts)
-    pdf_scaled = pdf * max_count / max(pdf)
+    # Tạo nhãn cho mỗi nhóm
+    bin_labels = [f'{int(bin_edges[i])} - {int(bin_edges[i+1])}' for i in range(len(bin_edges) - 1)]
 
-    # Plot the histogram and the PDF curve
-    plt.hist(average_lengths, bins=bins, alpha=0.8, label='Particle Size Distribution', color='red', edgecolor='black', linewidth=1.5, hatch='//')
-    plt.plot(x, pdf_scaled, color='blue', label='Distribution Curve', linewidth=2)
+    # Vẽ biểu đồ cột ngang
+    plt.figure(figsize=(12, 8))
+    bars = plt.barh(bin_labels, hist, height=0.8)
 
-    # Calculate and display the mean size
-    mean_size = np.mean(average_lengths)
-    plt.axvline(mean_size, color='green', linestyle='--', linewidth=2, label=f'Mean Size: {mean_size:.2f}')
+    # Thêm số lượng cho từng cột
+    for bar in bars:
+        plt.text(bar.get_width() + 0.1, bar.get_y() + bar.get_height()/2, f'{int(bar.get_width())}', va='center')
 
-    # Set titles and labels
-    plt.title(title_name)
-    plt.xlabel('Size')
-    plt.ylabel('Density')
+    # Thiết lập thang logarit cho trục x
+    plt.xscale('log')
+    plt.gca().xaxis.set_major_locator(LogLocator(base=10.0, numticks=10))
+    plt.gca().xaxis.set_major_formatter(ScalarFormatter())
 
-    # Display the legend
-    plt.legend()
+    # Thiết lập tiêu đề và nhãn
+    plt.title('Phân bố kích thước tinh thể ')
+    plt.xlabel('Số lượng')
+    plt.ylabel('Diện tích')
 
     # Save the chart to an image file
-    plt.savefig('size_distribution.png')
+    plt.savefig(file_path)
     plt.close()  # Close the plot to free up memory

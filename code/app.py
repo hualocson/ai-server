@@ -16,6 +16,8 @@ from utils.calc import measure_average_lengths_of_images
 import scipy.stats as ss
 import numpy as np
 from aistron.projects.aisformer.config import add_aisformer_config
+import time
+from utils.draw_distribution import plot_size_distribution
 
 model = None
 app = Flask(__name__)
@@ -62,28 +64,43 @@ def main():
             image=request.files['image']
             image_name=image.filename
 
-            input_file_name = "input.jpg"
-            amodal_file_name = "amodal.jpg"
-            visible_file_name = "visible.jpg"
+            curr_time = time.time()
+
+            input_file_name = f"input_{curr_time}.jpg"
+            amodal_file_name = f"amodal_{curr_time}.jpg"
+            visible_file_name = f"visible_{curr_time}.jpg"
+            chart_file_name = f"chart_{curr_time}.jpg"
 
             input_path = os.path.join(os.getcwd(), input_file_name)
             amodal_path = os.path.join(os.getcwd(), amodal_file_name)
             visible_path = os.path.join(os.getcwd(), visible_file_name)
+            chart_path = os.path.join(os.getcwd(), chart_file_name)
 
             if '.jpg' in image_name or '.png' in image_name or '.jpeg' in image_name:
                 # check if input.jpg exists remove it
                 image.save(input_path)
                 # load image to model and get prediction
-                image, visible_image, amodal_image, num_amodal_instances,  num_visible_instances= predict(input_path, cfg)
+                image, visible_image, amodal_image, num_amodal_instances,  num_visible_instances, mask_areas  = predict(input_path, cfg)
                 cv2.imwrite(visible_path, visible_image)
                 cv2.imwrite(amodal_path, amodal_image)
+
+                plot_size_distribution(mask_areas, chart_path)
 
                 with open(amodal_path, 'rb') as image_file:
                     amodal_image_data = base64.b64encode(image_file.read()).decode('utf-8')
                 with open(visible_path, 'rb') as image_file:
                     visible_image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                with open(chart_path, 'rb') as image_file:
+                    chart_image_data = base64.b64encode(image_file.read()).decode('utf-8')
+
                 # return prediction
-                response = {"amodalImage": amodal_image_data, "visibleImage": visible_image_data, "numAmodalInstances": num_amodal_instances, "numVisibleInstances": num_visible_instances}
+                response = {"amodalImage": amodal_image_data, "visibleImage": visible_image_data, "numAmodalInstances": num_amodal_instances, "numVisibleInstances": num_visible_instances, "chartImage": chart_image_data}
+                # remove image after prediction
+                os.remove(input_path)
+                os.remove(amodal_path)
+                os.remove(visible_path)
+                os.remove(chart_path)
+
                 return jsonify(response)
             else:
                 return {"error":"select you image file"}
@@ -125,5 +142,5 @@ def after_request(response):
 
 if __name__ == '__main__':
     load_model()  # load model at the beginning once only
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8000, debug=True)
     # enable debug mode
